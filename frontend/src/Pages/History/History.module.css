@@ -1,0 +1,54 @@
+.container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.title {
+  margin-bottom: 16px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.tableWrapper{
+    width: 100%;
+    height: 80%;
+    background-color: white;
+    /* border-radius: 8px; */
+    overflow-y: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 8px;
+  border: none;
+}
+
+
+.table td {
+  padding: 12px;
+}
+
+.table tbody svg{
+    width: 20px;
+    height: 20px;
+}
+
+.row {
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.titleCell {
+  font-weight: 500;
+}
+
+.empty {
+  text-align: center;
+  padding: 20px;
+}
+
+.table tbody {
+  overflow: hidden;
+}
