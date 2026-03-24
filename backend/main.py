@@ -11,9 +11,13 @@ from flask_cors import CORS
 from datetime import datetime
 import uuid
 import re
+import time
+import requests
+from urllib.parse import quote
 
 # Import the AI pipeline while ai is in path
 from pipeline import get_answer
+from online_retrieval import get_online_data
 
 # Remove ai from path to avoid import conflicts
 sys.path.remove(ai_path)
@@ -80,6 +84,107 @@ def validate_username(username):
     """Username must be 3-20 chars, alphanumeric and underscore."""
     pattern = r'^[a-zA-Z0-9_]{3,20}$'
     return re.match(pattern, username) is not None
+
+
+def build_online_fallback_answer(query):
+    """
+    Build a direct answer from online snippets when the RAG guard blocks output.
+    This keeps UI responses useful without changing the AI pipeline code.
+    """
+    snippets = []
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            snippets = get_online_data(query)
+            if snippets:
+                break
+        except Exception as e:
+            print(f"Online fallback error (attempt {attempt + 1}/{max_retries}): {e}")
+        time.sleep(0.6)
+
+    if not snippets:
+        wiki_summary = get_wikipedia_summary(query)
+        if wiki_summary:
+            return (
+                f"{wiki_summary}\n\n📌 Source: Wikipedia | Marks: General"
+            )
+        return (
+            "I could not find enough reliable online context right now. "
+            "Please try rephrasing your question."
+        )
+
+    concise_snippets = [s.strip() for s in snippets if s and s.strip()][:3]
+    return (
+        "Here is what I found online:\n\n- "
+        + "\n- ".join(concise_snippets)
+        + "\n\n📌 Source: Online Search | Marks: General"
+    )
+
+
+def extract_topic_from_query(query):
+    """Extract likely topic from common question forms."""
+    q = query.strip().rstrip("?.! ")
+    lower_q = q.lower()
+    prefixes = [
+        "what is ",
+        "who is ",
+        "define ",
+        "explain ",
+        "tell me about ",
+    ]
+    for prefix in prefixes:
+        if lower_q.startswith(prefix):
+            return q[len(prefix):].strip()
+    return q
+
+
+def get_wikipedia_summary(query):
+    """
+    Fallback source for consistent responses when search snippets are empty.
+    Uses Wikipedia REST summary API with simple retries.
+    """
+    topic = extract_topic_from_query(query)
+    if not topic:
+        return None
+
+    url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{quote(topic)}"
+    headers = {"User-Agent": "llm-rag-system/1.0 (educational project)"}
+
+    for attempt in range(2):
+        try:
+            resp = requests.get(url, headers=headers, timeout=6)
+            if resp.status_code == 200:
+                data = resp.json()
+                extract = data.get("extract", "").strip()
+                if extract:
+                    return extract
+            # If exact title fails, try query search endpoint once.
+            search_url = (
+                "https://en.wikipedia.org/w/api.php"
+                f"?action=query&list=search&srsearch={quote(topic)}&format=json&srlimit=1"
+            )
+            s_resp = requests.get(search_url, headers=headers, timeout=6)
+            if s_resp.status_code == 200:
+                s_data = s_resp.json()
+                search_hits = s_data.get("query", {}).get("search", [])
+                if search_hits:
+                    page_title = search_hits[0].get("title", "")
+                    if page_title:
+                        summary_url = (
+                            "https://en.wikipedia.org/api/rest_v1/page/summary/"
+                            + quote(page_title)
+                        )
+                        p_resp = requests.get(summary_url, headers=headers, timeout=6)
+                        if p_resp.status_code == 200:
+                            p_data = p_resp.json()
+                            extract = p_data.get("extract", "").strip()
+                            if extract:
+                                return extract
+        except Exception as e:
+            print(f"Wikipedia fallback error (attempt {attempt + 1}/2): {e}")
+        time.sleep(0.4)
+
+    return None
 
 
 # ============= AUTHENTICATION ENDPOINTS =============
@@ -211,9 +316,13 @@ def create_chat_endpoint():
         # Get AI response using the RAG pipeline
         try:
             ai_response = get_answer(query)
+            if not ai_response or not ai_response.strip():
+                ai_response = build_online_fallback_answer(query)
+            if "I don't have enough data to answer this" in ai_response:
+                ai_response = build_online_fallback_answer(query)
         except Exception as e:
             print(f"Error getting AI response: {e}")
-            ai_response = "Sorry, I encountered an error processing your request."
+            ai_response = build_online_fallback_answer(query)
 
         # Extract source and marks from response
         source = "Hybrid (Docs + Online)"
@@ -324,9 +433,13 @@ def add_message(chat_id):
         # Get AI response
         try:
             ai_response = get_answer(query)
+            if not ai_response or not ai_response.strip():
+                ai_response = build_online_fallback_answer(query)
+            if "I don't have enough data to answer this" in ai_response:
+                ai_response = build_online_fallback_answer(query)
         except Exception as e:
             print(f"Error getting AI response: {e}")
-            ai_response = "Sorry, I encountered an error processing your request."
+            ai_response = build_online_fallback_answer(query)
 
         # Extract source and marks
         source = "Hybrid (Docs + Online)"

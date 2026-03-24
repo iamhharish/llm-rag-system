@@ -14,13 +14,14 @@ const Chat = () => {
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [isThinking, setIsThinking] = useState(false);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const sendMessage = async () => {
-    if (!input.trim() || !userId) return;
+    if (!input.trim() || !userId || isThinking) return;
 
     const userMessage = {
       id: Date.now(),
@@ -30,6 +31,7 @@ const Chat = () => {
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setIsThinking(true);
 
     try {
       const res = await axios.post("http://localhost:5000/chat", {
@@ -55,6 +57,8 @@ const Chat = () => {
           sender: 1,
         },
       ]);
+    } finally {
+      setIsThinking(false);
     }
   };
 
@@ -71,6 +75,11 @@ const Chat = () => {
             <ReactMarkdown>{message.text}</ReactMarkdown>
           </div>
         ))}
+        {isThinking && (
+          <div className={`${styles.message} ${styles.bot}`}>
+            <ReactMarkdown>Thinking...</ReactMarkdown>
+          </div>
+        )}
         <div ref={chatEndRef}></div>
       </div>
 
@@ -81,8 +90,11 @@ const Chat = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          disabled={isThinking}
         />
-        <button onClick={sendMessage}>Send</button>
+        <button onClick={sendMessage} disabled={isThinking}>
+          {isThinking ? "Thinking..." : "Send"}
+        </button>
       </div>
     </div>
   );
