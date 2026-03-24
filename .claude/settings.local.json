@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install:*)",
+      "Bash(./venv/Scripts/pip install:*)",
+      "Bash(./venv/Scripts/python main.py)",
+      "Bash(python:*)",
+      "Bash(/c/Users/SilverCloud/Documents/AI/llm-rag-system/.venv/Scripts/python /c/Users/SilverCloud/Documents/AI/llm-rag-system/backend/main.py)",
+      "Bash(/c/Users/SilverCloud/Documents/AI/llm-rag-system/.venv/Scripts/pip install:*)",
+      "Bash(/c/Users/SilverCloud/Documents/AI/llm-rag-system/.venv/Scripts/python -c \"from duckduckgo_search import DDGS; print\\('success'\\)\")",
+      "Bash(.venv/Scripts/activate)",
+      "Bash(.venv/Scripts/python backend/main.py)",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":5000\")",
+      "Bash(taskkill:*)"
+    ]
+  }
+}
