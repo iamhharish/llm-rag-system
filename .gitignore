@@ -1,0 +1,36 @@
+# --- Virtual Environments ---
+
+mods/
+.venv/
+venv/
+env/
+
+# --- Python & OS Cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+.DS_Store
+Thumbs.db
+
+# --- Large Model Files ---
+# These are too big for GitHub (GBs); 
+*.pt
+*.bin
+*.pth
+*.h5
+*.ckpt
+
+# --- Project Data & Logs ---
+
+data/
+project_logs.csv
+*.log
+
+# --- Environment Variables & Keys ---
+e
+.env
+.flaskenv
+
+# --- VS Code & IDE ---
+.vscode/
+.idea/
