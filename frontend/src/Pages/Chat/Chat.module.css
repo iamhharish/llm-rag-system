@@ -1,0 +1,131 @@
+.container{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: aqua;
+}
+
+.chats{
+    position: relative;
+    width: 100%;
+    height: 80%;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+}
+
+.message{
+    width: 80%;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #f1f1f1;
+}
+
+.user{
+    align-self: flex-end;
+    background-color: #007bff;
+    color: white;
+}
+
+.bot{
+    align-self: flex-start;
+    background-color: #f1f1f1;
+    color: black;
+}
+
+.input{
+    position: relative;
+    width: 100%;
+    height: 20%;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.input input{
+    width: 80%;
+    height: 50%;
+    border-radius: 10px;
+    border: none;
+    padding: 10px;
+    font-size: 16px;
+    background-color:bisque;
+}
+
+.input button{
+    width: 15%;
+    height: 50%;
+    border-radius: 10px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    font-size: 16px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+
+
+
+.message p {
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+.message h1 {
+  margin: 12px 0;
+  font-size: 22px;
+}
+
+.message h2 {
+  margin: 10px 0;
+  font-size: 20px;
+}
+
+.message h3 {
+  margin: 8px 0;
+  font-size: 18px;
+}
+
+
+.message ul {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.message ol {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.message li {
+  margin: 4px 0;
+}
+
+
+.message strong {
+  font-weight: bold;
+}
+
+.message em {
+  font-style: italic;
+}
+
+
+.message code {
+  background: #eee;
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.message pre {
+  background: #222;
+  color: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
