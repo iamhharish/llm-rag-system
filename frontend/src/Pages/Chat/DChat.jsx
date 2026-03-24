@@ -16,7 +16,7 @@ const DChat = () => {
   const [input, setInput] = useState("");
 
   useEffect(() => {
-    if (!chatId) return;
+    if (!chatId || !userId) return;
 
     const fetchMessages = async () => {
       try {
@@ -25,7 +25,7 @@ const DChat = () => {
         );
 
         const formatted = res.data.map((msg, index) => ({
-          id: index,
+          id: msg.id || index,
           text: msg.content,
           sender: msg.sender === "user" ? 0 : 1,
         }));
@@ -37,7 +37,7 @@ const DChat = () => {
     };
 
     fetchMessages();
-  }, [chatId]);
+  }, [chatId, userId]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -57,13 +57,10 @@ const DChat = () => {
     setInput("");
 
     try {
-      const res = await axios.post(
-        `http://localhost:5000/chat/${chatId}`,
-        {
-          query: input,
-          user_id: userId,
-        }
-      );
+      const res = await axios.post(`http://localhost:5000/chat/${chatId}/message`, {
+        query: input,
+        user_id: userId,
+      });
 
       const botMessage = {
         id: Date.now() + 1,
@@ -73,13 +70,15 @@ const DChat = () => {
 
       setMessages((prev) => [...prev, botMessage]);
     } catch (err) {
-      console.error(err);
+      console.error("Send message failed:", err?.response?.data || err.message);
+      const serverError =
+        err?.response?.data?.error || "Error getting response";
 
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now(),
-          text: "Error getting response",
+          text: serverError,
           sender: 1,
         },
       ]);

@@ -17,9 +17,7 @@ const History = () => {
 
     const fetchChats = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:5000/chat/history/${userId}`,
-        );
+        const res = await axios.get(`http://localhost:5000/user/${userId}/chats`);
         setChats(res.data);
       } catch (err) {
         console.error(err);
@@ -44,8 +42,8 @@ const History = () => {
             {chats.length > 0 ? (
               chats.map((chat, index) => (
                 <tr
-                  key={chat.chat_id}
-                  onClick={() => handleOpenChat(chat.chat_id)}
+                  key={chat.id}
+                  onClick={() => handleOpenChat(chat.id)}
                   className={styles.row}
                 >
                   {/* <td>{index + 1}</td> */}

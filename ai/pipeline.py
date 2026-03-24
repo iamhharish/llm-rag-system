@@ -30,12 +30,19 @@ def initialize_system(folder="data"):
     index = build_index(embed_model.encode(chunks)) if chunks else None
 
     tokenizer = AutoTokenizer.from_pretrained(LLM_MODEL)
-    # Load in FP16 for the best balance of speed and accuracy
-    llm = AutoModelForCausalLM.from_pretrained(
-        LLM_MODEL, 
-        torch_dtype=torch.float16, 
-        device_map="auto"
-    )
+    # Keep model loading compatible on machines without accelerate/GPU.
+    if torch.cuda.is_available():
+        llm = AutoModelForCausalLM.from_pretrained(
+            LLM_MODEL,
+            dtype=torch.float16,
+            device_map="auto"
+        )
+    else:
+        llm = AutoModelForCausalLM.from_pretrained(
+            LLM_MODEL,
+            dtype=torch.float32
+        )
+        llm = llm.to("cpu")
     
     if not os.path.exists(LOG_FILE):
         with open(LOG_FILE, 'w', newline='', encoding='utf-8') as f:

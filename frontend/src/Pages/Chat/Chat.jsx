@@ -43,13 +43,15 @@ const Chat = () => {
       navigate(`/chat/${chatId}`);
 
     } catch (error) {
-      console.error(error);
+      console.error("Create chat failed:", error?.response?.data || error.message);
+      const serverError =
+        error?.response?.data?.error || "Error creating chat";
 
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now(),
-          text: "Error creating chat",
+          text: serverError,
           sender: 1,
         },
       ]);
